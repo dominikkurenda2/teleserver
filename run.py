@@ -16,6 +16,7 @@ import tools.app_callbacks as callback
 from tools.common import OPENMEET_var
 from tools.secret_manager import SecretManager
 import tools.system_calls as system
+from dash.exceptions import PreventUpdate
 
 sec = SecretManager()
 VALID_USERNAME_PASSWORD_PAIRS = sec.get_credentials_for_GUI()
