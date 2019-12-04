@@ -6,8 +6,10 @@ import pyscreenshot as ImageGrab
 from subprocess import call
 import webbrowser
 from Xlib.error import DisplayNameError
+import os
 
 from tools.common import UPLOAD_DIRECTORY
+from tools.common import HISTORY_DIRECTORY
 
 try:
     from pynput.keyboard import Controller
@@ -161,3 +163,57 @@ def get_screen():
     buffered_screen = BytesIO()
     screen.save(buffered_screen, format='JPEG')
     return base64.b64encode(buffered_screen.getvalue()).decode('utf-8')
+
+
+def url_history(url):
+    """ Saves casted url in file
+
+    """
+
+    now = datetime.now()
+    dt_string = now.strftime("%S_%M_%H_%d_%m_%Y")
+    f = open(os.path.join(HISTORY_DIRECTORY, dt_string), "w")
+    f.write(url)
+    f.close()
+
+
+def make_url_history(number):
+    """Makes list of stored urls
+
+    :param number: integer to pass to make_url_history()
+    :type number: int
+
+    :return: List of urls
+    :rtype: list
+    """
+
+    files = []
+    files = os.listdir(HISTORY_DIRECTORY)
+    sortedfiles = sorted(files, key=lambda x: (datetime.strptime(x, '%S_%M_%H_%d_%m_%Y')), reverse=True)
+    if number == 999999999999:
+        pass
+    else:
+        if len(sortedfiles) <= number:
+            pass
+        else:
+            del sortedfiles[number:len(files)]
+    urls = []
+    for filename in sortedfiles:
+        path = os.path.join(HISTORY_DIRECTORY, filename)
+        if os.path.isfile(path):
+            f = open(os.path.join(HISTORY_DIRECTORY, filename), "r")
+            urls.append(f.read())
+    return urls
+
+
+def get_url_history(number):
+    """Get dictionary of casted urls
+
+    :param number: integer to pass to make_url_history()
+    :type number: int
+
+    :return: Dictionary of urls
+    :rtype: dict
+    """
+    urls = make_url_history(number)
+    return [{'label': url_h, 'value': url_h} for url_h in urls]
