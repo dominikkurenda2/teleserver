@@ -173,33 +173,27 @@ def API_call_word():
 
 @app.callback(
     Output('open-output-message', 'children'),
-    [Input('url-button', 'n_clicks')], [State('url', 'value'),  State('url_history', 'value')])
-def GUI_app_open(n_clicks, value, value_h):
+    [Input('url-button', 'n_clicks')], [State('url', 'value')])
+def GUI_app_open(n_clicks, value):
     if n_clicks != 0:
-        if value_h is None:
-            system.web_open(value)
+        if not value:
+            pass
         else:
-            system.web_open(value_h)
+            system.web_open(value)
     return u'opened'
 
 
 @app.callback(
-    Output('url_history', 'options'),
-    [Input('url-button', 'n_clicks'), Input('url_history_number', 'n_clicks2')],
-    [State('url', 'value'), State('url_history', 'value'), State('url_history_number', 'value')])
-def app_history(n_clicks, n_clicks2, value, value2, number):
-    if n_clicks2 == 0:
+    Output('url_history', 'children'),
+    [Input('url-button', 'n_clicks')],
+    [State('url', 'value')])
+def app_history(n_clicks, value):
+    if not value:
         pass
     else:
-        system.get_url_history(number)
-    if n_clicks == 0:
-        raise PreventUpdate
-    else:
-        if value is '':
-            system.url_history(value2)
-        else:
-            system.url_history(value)
-        return system.get_url_history(number)
+        system.url_history(value)
+    urls = system.get_url_history()
+    return [html.Option(value='{}'.format(url)) for url in urls]
 
 
 @app.callback(
