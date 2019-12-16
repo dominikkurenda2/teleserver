@@ -6,10 +6,9 @@ import pyscreenshot as ImageGrab
 from subprocess import call
 import webbrowser
 from Xlib.error import DisplayNameError
-import os
+import yaml
 
 from tools.common import UPLOAD_DIRECTORY
-from tools.common import HISTORY_DIRECTORY
 
 try:
     from pynput.keyboard import Controller
@@ -170,50 +169,37 @@ def url_history(url):
 
     """
 
-    now = datetime.now()
-    dt_string = now.strftime("%S_%M_%H_%d_%m_%Y")
-    f = open(os.path.join(HISTORY_DIRECTORY, dt_string), "w")
-    f.write(url)
-    f.close()
+    with open('/var/lib/teleserver/app/config_teleserver.yml', 'r') as file:
+        urls = yaml.load(file, Loader=yaml.FullLoader)
+        urls_to_hist = urls.get("urls")
+        urls_config = urls.get("url_config")
 
-
-def make_url_history(number):
-    """Makes list of stored urls
-
-    :param number: integer to pass to make_url_history()
-    :type number: int
-
-    :return: List of urls
-    :rtype: list
-    """
-
-    files = []
-    files = os.listdir(HISTORY_DIRECTORY)
-    sortedfiles = sorted(files, key=lambda x: (datetime.strptime(x, '%S_%M_%H_%d_%m_%Y')), reverse=True)
-    if number == 999999999999:
-        pass
-    else:
-        if len(sortedfiles) <= number:
-            pass
+    if urls_to_hist is not None:
+        if len(urls_to_hist) < urls_config:
+            urls_to_hist.append(urls_to_hist[len(urls_to_hist) - 1])
+            for x in range(len(urls_to_hist)-1, -1, -1):
+                urls_to_hist[x] = urls_to_hist[x-1]
         else:
-            del sortedfiles[number:len(files)]
-    urls = []
-    for filename in sortedfiles:
-        path = os.path.join(HISTORY_DIRECTORY, filename)
-        if os.path.isfile(path):
-            f = open(os.path.join(HISTORY_DIRECTORY, filename), "r")
-            urls.append(f.read())
-    return urls
+            if len(urls_to_hist) > urls_config:
+                del urls_to_hist[urls_config:len(urls_to_hist)]
+            for x in range((urls_config-1), -1, -1):
+                urls_to_hist[x] = urls_to_hist[x-1]
+        urls_to_hist[0] = url
+    else:
+        urls_to_hist = []
+        urls_to_hist.append(url)
+
+    with open('/var/lib/teleserver/app/config_teleserver.yml', 'w') as file:
+        yaml.dump(dict(urls=urls_to_hist, url_config=urls_config), file)
 
 
-def get_url_history(number):
-    """Get dictionary of casted urls
+def get_url_history():
+    """Get array of casted urls
 
-    :param number: integer to pass to make_url_history()
-    :type number: int
-
-    :return: Dictionary of urls
-    :rtype: dict
+    :return: Array of urls
+    :rtype: array
     """
-    urls = make_url_history(number)
-    return [{'label': url_h, 'value': url_h} for url_h in urls]
+    with open('/var/lib/teleserver/app/config_teleserver.yml') as file:
+        urls = yaml.load(file, Loader=yaml.FullLoader)
+        urls_hist = urls.get("urls")
+    return urls_hist
