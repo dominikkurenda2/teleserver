@@ -7,6 +7,7 @@ from subprocess import call
 import webbrowser
 from Xlib.error import DisplayNameError
 import yaml
+from collections import deque
 
 from tools.common import UPLOAD_DIRECTORY
 
@@ -166,30 +167,25 @@ def get_screen():
 
 def url_history(url):
     """ Saves casted url in file
-
+    
+    :param url: Url to save
+    :param url: str
     """
 
     with open('/var/lib/teleserver/app/config_teleserver.yml', 'r') as file:
-        urls = yaml.load(file, Loader=yaml.FullLoader)
-        urls_to_hist = urls.get("urls")
-        urls_config = urls.get("url_config")
+        urls = yaml.safe_load(file)
+        historic_urls = urls.get("urls")
+        number_of_urls = urls.get("url_config")
 
-    if urls_to_hist is not None:
-        if len(urls_to_hist) < urls_config:
-            urls_to_hist.append(urls_to_hist[len(urls_to_hist) - 1])
-            for x in range(len(urls_to_hist)-1, -1, -1):
-                urls_to_hist[x] = urls_to_hist[x-1]
-        else:
-            if len(urls_to_hist) > urls_config:
-                del urls_to_hist[urls_config:len(urls_to_hist)]
-            for x in range((urls_config-1), -1, -1):
-                urls_to_hist[x] = urls_to_hist[x-1]
-        urls_to_hist[0] = url
+    if historic_urls is not None:
+        historic_urls_queue = deque(historic_urls, number_of_urls)
+        historic_urls_queue.append(url)
+        historic_urls = list(historic_urls_queue)
     else:
-        urls_to_hist = [url]
+        historic_urls = [url]
 
     with open('/var/lib/teleserver/app/config_teleserver.yml', 'w') as file:
-        yaml.dump(dict(urls=urls_to_hist, url_config=urls_config), file)
+        yaml.dump(dict(urls=historic_urls, url_config=number_of_urls), file)
 
 
 def get_url_history():
@@ -199,6 +195,6 @@ def get_url_history():
     :rtype: array
     """
     with open('/var/lib/teleserver/app/config_teleserver.yml') as file:
-        urls = yaml.load(file, Loader=yaml.FullLoader)
+        urls = yaml.safe_load(file)
         urls_hist = urls.get("urls")
     return urls_hist
