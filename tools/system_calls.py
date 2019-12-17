@@ -167,7 +167,7 @@ def get_screen():
 
 def url_history(url):
     """ Saves casted url in file
-    
+
     :param url: Url to save
     :type url: str
     """
