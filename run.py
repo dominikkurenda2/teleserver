@@ -196,6 +196,9 @@ def app_history(n_clicks, value):
     else:
         system.url_history(value)
     urls = system.get_url_history()
+    if not urls:
+        return
+    urls.reverse()
     return [html.Option(value='{}'.format(url)) for url in urls]
 
 
