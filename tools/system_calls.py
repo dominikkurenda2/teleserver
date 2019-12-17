@@ -186,8 +186,7 @@ def url_history(url):
                 urls_to_hist[x] = urls_to_hist[x-1]
         urls_to_hist[0] = url
     else:
-        urls_to_hist = []
-        urls_to_hist.append(url)
+        urls_to_hist = [url]
 
     with open('/var/lib/teleserver/app/config_teleserver.yml', 'w') as file:
         yaml.dump(dict(urls=urls_to_hist, url_config=urls_config), file)
