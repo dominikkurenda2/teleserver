@@ -169,7 +169,7 @@ def url_history(url):
     """ Saves casted url in file
     
     :param url: Url to save
-    :param url: str
+    :type url: str
     """
 
     with open('/var/lib/teleserver/app/config_teleserver.yml', 'r') as file:
