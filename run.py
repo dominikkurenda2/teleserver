@@ -9,6 +9,7 @@ import inspect
 import jwt
 import os
 import datetime
+import dash_html_components as html
 
 from layouts.keyboard_layout import FLAT_KEYBOARD_KEYS, KEYBOARD_NAMES
 from layouts.key_control_layout import SHORTCUT_NAMES, SHORTCUTS
